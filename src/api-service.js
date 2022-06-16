@@ -1,4 +1,5 @@
 const axios = require('axios').default;
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 export default class ApiService {
     constructor() {
@@ -17,7 +18,7 @@ export default class ApiService {
         .get(`https://pixabay.com/api/`, {
             params: {
                 key: API_KEY,
-                q: this.searchQuery,
+                q: this.searchQuery.trim(),
                 image_type: 'photo',
                 orientation: 'horizontal',
                 safesearch: true,
@@ -25,16 +26,20 @@ export default class ApiService {
                 page: this.page,
             }
         }).then(res => {
-            this.incrementPage();
-            
+            this.incrementPage()
+            if(this.searchQuery.trim() === '') {
+                Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+                return;
+            }
+            console.dir(res);
             return res.data.hits;
         })
+        .catch(err => console.dir(err));
     }
 
     incrementPage() {
         this.page += 1;
     }
-
 
     resetPage() {
         this.page = 1;

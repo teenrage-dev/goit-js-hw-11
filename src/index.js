@@ -9,13 +9,26 @@ const refs = {
     searchForm: document.querySelector('#search-form'),
     loadMoreBtn: document.querySelector('.load-more'),
     galleryContainer: document.querySelector('.gallery'),
+    loading: document.querySelector('.loading'),
 };
 
 const apiService = new ApiService();
 
 
 refs.searchForm.addEventListener('submit', onSearch);
-refs.loadMoreBtn.addEventListener('click', onLoadMore);
+// refs.loadMoreBtn.addEventListener('click', onLoadMore);
+window.addEventListener('scroll', () => {
+
+    const { scrollHeight, clientHeight, scrollTop } = document.documentElement;
+    // console.log(scrollHeight, clientHeight, scrollTop);
+
+    if (clientHeight + scrollTop >= scrollHeight - 5) {
+        // console.log('load more');
+
+        setTimeout(onLoadMore(), 500);
+    }
+
+});
 
 
 let lightbox;
@@ -34,30 +47,45 @@ function onSearch(e) {
     apiService.resetPage();
 
     apiService.axiosPhotos().then( photos => {
-
-        if(photos.length === 0) {
+        refs.loading.classList.add('visually-hidden');
+        console.log(photos);
+        if(photos.hits.length === 0) {
             Notify.failure('Sorry, there are no images matching your search query. Please try again.');
             return;
         }
 
         Notify.success(`Hooray! We found ${photos.totalHits} images.`);
 
-        const photosEl = photos.map(createPhotoEl).forEach(addPhotoToGallery);
+        const photosEl = photos.hits.map(createPhotoEl).forEach(addPhotoToGallery);
         lightbox = new SimpleLightbox('.gallery div a', { captionsData: "alt", captionDelay: 250,});
-        
-        return photosEl;
+
+        // return photosEl;
     });
 }
 
 function onLoadMore () {
+    refs.loading.classList.remove('visually-hidden');
+
     apiService.axiosPhotos().then( photos => {
-        if(photos.length === 0) {
+        if(photos.hits.length === 0) {
+            refs.loading.classList.add('visually-hidden');
             Notify.info("We're sorry, but you've reached the end of search results.");
             return;
         }
-        const photosEl = photos.map(createPhotoEl).forEach(addPhotoToGallery);
+        const photosEl = photos.hits.map(createPhotoEl).forEach(addPhotoToGallery);
         refreshLightbox();
+        refs.loading.classList.add('visually-hidden');
         return photosEl;
+    })
+    .catch(err => {
+        refs.loading.classList.add('visually-hidden');
+
+        // console.log(err);
+        
+        if(err.response.status === 400) {
+            Notify.info("We're sorry, but you've reached the end of search results.");
+            return;
+        }
     });
 }
 
@@ -94,4 +122,3 @@ function addPhotoToGallery(photo) {
 function clearGallery() {
     refs.galleryContainer.innerHTML = '';
 }
-

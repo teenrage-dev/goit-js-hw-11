@@ -24,6 +24,19 @@ img{
   object-fit: cover;
 }
 
+.visually-hidden {
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  margin: -1px;
+}
+
 
 .form-container {
   background: #3f56ae;
@@ -57,7 +70,7 @@ img{
 
 
 .gallery{
-  padding: 40px 20px;
+  padding: 80px 20px;
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
@@ -109,4 +122,43 @@ img{
   width: 150px;
   display: block;
   margin-bottom: 40px;
+}
+
+
+/*-------------------- LOADING ...  --------------------- */
+.loading {
+  display: flex;
+  /* justify-content: center; */
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+	transition: opacity .3s ease-in;
+}
+
+.circle {
+	background-color: #8b8a8e;
+	border-radius: 50%;
+	margin: 2px;
+	height: 10px;
+	width: 10px;
+	animation: jump .5s ease-in infinite;
+}
+
+.circle:nth-of-type(2) {
+	animation-delay: 0.1s;
+}
+
+.circle:nth-of-type(3) {
+	animation-delay: 0.2s;
+}
+
+@keyframes jump {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	
+	50% {
+		transform: translateY(-10px);
+	}
 }

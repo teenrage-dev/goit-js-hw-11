@@ -12,7 +12,7 @@ export default class ApiService {
 
 
     axiosPhotos() {
-        console.log(this);
+        // console.log(this);
         const API_KEY = '28032528-2733f4db32465b2bae0fa9703';
         return axios
         .get(`https://pixabay.com/api/`, {
@@ -31,10 +31,9 @@ export default class ApiService {
                 Notify.failure('Sorry, there are no images matching your search query. Please try again.');
                 return;
             }
-            console.dir(res);
-            return res.data.hits;
+            // console.log(res.data.hits);
+            return res.data;
         })
-        .catch(err => console.dir(err));
     }
 
     incrementPage() {

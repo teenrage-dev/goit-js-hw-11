@@ -84,32 +84,27 @@ async function onSearch(e) {
 
 async function onLoadMore () {
     try {
-    await refs.loading.classList.remove('visually-hidden');
+        await refs.loading.classList.remove('visually-hidden');
 
-    const service = await apiService.axiosPhotos();
-    // console.log(service);
+        const service = await apiService.axiosPhotos();
+        console.log(service);
 
-    if(service.hits.length === 0) {
-        refs.loading.classList.add('visually-hidden');
-        Notify.info("We're sorry, but you've reached the end of search results.");
-        return;
-    }
-
-    const photosEl = await service.hits.map(createPhotoEl).forEach(addPhotoToGallery);
-        refreshLightbox();
-        refs.loading.classList.add('visually-hidden');
-
-    return photosEl;
-    } catch (error) {
-        refs.loading.classList.add('visually-hidden');
-
-        console.log(error);
-        
-        if(error.response.status === 400) {
+        if(service.hits.length === 0) {
+            refs.loading.classList.add('visually-hidden');
             Notify.info("We're sorry, but you've reached the end of search results.");
             return;
         }
+
+        const photosEl = await service.hits.map(createPhotoEl).forEach(addPhotoToGallery);
+            refreshLightbox();
+            refs.loading.classList.add('visually-hidden');
+
+        return photosEl;
+    } catch (error) {
+        refs.loading.classList.add('visually-hidden');
     }
+
+
     // .then( photos => {
     //     if(photos.hits.length === 0) {
     //         refs.loading.classList.add('visually-hidden');
@@ -132,6 +127,7 @@ async function onLoadMore () {
     //         return;
     //     }
     // });
+    
 }
 
 
@@ -167,3 +163,6 @@ function addPhotoToGallery(photo) {
 function clearGallery() {
     refs.galleryContainer.innerHTML = '';
 }
+
+
+// apiService.axiosPhotos().then( photos => {console.log(photos)});

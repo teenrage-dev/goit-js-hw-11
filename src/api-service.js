@@ -9,8 +9,6 @@ export default class ApiService {
 
 
 
-
-
     axiosPhotos() {
         // console.log(this);
         const API_KEY = '28032528-2733f4db32465b2bae0fa9703';

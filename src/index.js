@@ -17,18 +17,18 @@ const apiService = new ApiService();
 
 refs.searchForm.addEventListener('submit', onSearch);
 // refs.loadMoreBtn.addEventListener('click', onLoadMore);
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', onScroll);
 
+function onScroll() {
     const { scrollHeight, clientHeight, scrollTop } = document.documentElement;
     // console.log(scrollHeight, clientHeight, scrollTop);
 
     if (clientHeight + scrollTop >= scrollHeight - 5) {
         // console.log('load more');
 
-        setTimeout(onLoadMore(), 500);
+        onLoadMore();
     }
-
-});
+};
 
 
 let lightbox;
@@ -36,7 +36,7 @@ function refreshLightbox() {
     lightbox.refresh();
 }
 
-function onSearch(e) {
+async function onSearch(e) {
 
     e.preventDefault();
 
@@ -44,49 +44,94 @@ function onSearch(e) {
 
     apiService.query = e.target.elements[0].value;
 
-    apiService.resetPage();
+    await apiService.resetPage();
 
-    apiService.axiosPhotos().then( photos => {
-        refs.loading.classList.add('visually-hidden');
-        console.log(photos);
-        if(photos.hits.length === 0) {
+    const service = await apiService.axiosPhotos();
+    await refs.loading.classList.add('visually-hidden');
+
+    if(service.hits.length === 0) {
             Notify.failure('Sorry, there are no images matching your search query. Please try again.');
             return;
         }
 
-        Notify.success(`Hooray! We found ${photos.totalHits} images.`);
+        Notify.success(`Hooray! We found ${service.totalHits} images.`);
 
-        const photosEl = photos.hits.map(createPhotoEl).forEach(addPhotoToGallery);
+        const photosEl = service.hits.map(createPhotoEl).forEach(addPhotoToGallery);
         lightbox = new SimpleLightbox('.gallery div a', { captionsData: "alt", captionDelay: 250,});
 
-        // return photosEl;
-    });
+        return photosEl;
+    
+
+    // console.log(service);
+
+
+    //     .then( photos => {
+    //         refs.loading.classList.add('visually-hidden');
+    //         // console.log(photos);
+    //         if(photos.hits.length === 0) {
+    //             Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+    //             return;
+    //         }
+
+    //         Notify.success(`Hooray! We found ${photos.totalHits} images.`);
+
+    //         const photosEl = photos.hits.map(createPhotoEl).forEach(addPhotoToGallery);
+    //         lightbox = new SimpleLightbox('.gallery div a', { captionsData: "alt", captionDelay: 250,});
+
+    //         return photosEl;
+    // });
 }
 
-function onLoadMore () {
-    refs.loading.classList.remove('visually-hidden');
+async function onLoadMore () {
+    try {
+    await refs.loading.classList.remove('visually-hidden');
 
-    apiService.axiosPhotos().then( photos => {
-        if(photos.hits.length === 0) {
-            refs.loading.classList.add('visually-hidden');
-            Notify.info("We're sorry, but you've reached the end of search results.");
-            return;
-        }
-        const photosEl = photos.hits.map(createPhotoEl).forEach(addPhotoToGallery);
+    const service = await apiService.axiosPhotos();
+    // console.log(service);
+
+    if(service.hits.length === 0) {
+        refs.loading.classList.add('visually-hidden');
+        Notify.info("We're sorry, but you've reached the end of search results.");
+        return;
+    }
+
+    const photosEl = await service.hits.map(createPhotoEl).forEach(addPhotoToGallery);
         refreshLightbox();
         refs.loading.classList.add('visually-hidden');
-        return photosEl;
-    })
-    .catch(err => {
+
+    return photosEl;
+    } catch (error) {
         refs.loading.classList.add('visually-hidden');
 
-        // console.log(err);
+        console.log(error);
         
-        if(err.response.status === 400) {
+        if(error.response.status === 400) {
             Notify.info("We're sorry, but you've reached the end of search results.");
             return;
         }
-    });
+    }
+    // .then( photos => {
+    //     if(photos.hits.length === 0) {
+    //         refs.loading.classList.add('visually-hidden');
+    //         Notify.info("We're sorry, but you've reached the end of search results.");
+    //         return;
+    //     }
+    //     const photosEl = photos.hits.map(createPhotoEl).forEach(addPhotoToGallery);
+    //     refreshLightbox();
+    //     refs.loading.classList.add('visually-hidden');
+
+    //     return photosEl;
+    // })
+    // .catch(err => {
+    //     refs.loading.classList.add('visually-hidden');
+
+    //     // console.log(err);
+        
+    //     if(err.response.status === 400) {
+    //         Notify.info("We're sorry, but you've reached the end of search results.");
+    //         return;
+    //     }
+    // });
 }
 
 
